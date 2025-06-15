@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deal Sense</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Deal Sense</h1>
+
+        <div class="input-and-button-group"> <label for="companyName">Company Name</label>
+            <div class="input-with-button">
+                <input type="text" id="companyName" placeholder="Enter company name">
+                <button type="button" id="searchButton">Search</button> </div>
+        </div>
+
+        <div class="checkbox-group">
+            <label class="checkbox-item">
+                ChatGPT
+                <input type="checkbox" checked>
+                <span class="slider round"></span>
+            </label>
+            <label class="checkbox-item">
+                Gemini
+                <input type="checkbox">
+                <span class="slider round"></span>
+            </label>
+            <label class="checkbox-item">
+                Perplexity
+                <input type="checkbox">
+                <span class="slider round"></span>
+            </label>
+            <label class="checkbox-item">
+                Claude
+                <input type="checkbox">
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <div id="responseSection" class="hidden"> <h2>Review & Edit Prompt</h2>
+            <textarea id="proposalText" rows="10" placeholder="Your prompt will appear here..."></textarea>
+            <div class="response-buttons">
+                <button type="button" id="submitPromptButton" class="action-button">Submit</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
