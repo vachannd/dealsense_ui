@@ -5,45 +5,389 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deal Sense</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Basic styling for the form elements and layout */
+        body {
+            font-family: 'Inter', sans-serif; /* Using Inter font as per guidelines */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #555;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .input-and-button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-with-button {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #4CAF50;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            padding: 10px 0;
+            border-radius: 8px;
+        }
+
+        .checkbox-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            color: #555;
+            cursor: pointer;
+        }
+
+        .checkbox-item input {
+            opacity: 0; /* Hide default checkbox */
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+            background-color: #ccc;
+            border-radius: 20px;
+            transition: background-color 0.4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.4s;
+        }
+
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        .response-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .action-button {
+            background-color: #007bff;
+        }
+
+        .action-button:hover {
+            background-color: #0056b3;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            min-height: 200px;
+            resize: vertical;
+            box-sizing: border-box; /* Include padding in width */
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            border-color: #007bff;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #loadingIndicator {
+            text-align: center;
+            color: #666;
+            margin-top: 15px;
+        }
+
+        #errorMessage {
+            text-align: center;
+            color: #d9534f;
+            margin-top: 15px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Deal Sense</h1>
 
-        <div class="input-and-button-group"> <label for="companyName">Company Name</label>
+        <div class="input-and-button-group">
+            <label for="companyName">Company Name</label>
             <div class="input-with-button">
                 <input type="text" id="companyName" placeholder="Enter company name">
-                <button type="button" id="searchButton">Search</button> </div>
+                <button type="button" id="searchButton">Search</button>
+            </div>
         </div>
 
         <div class="checkbox-group">
             <label class="checkbox-item">
                 ChatGPT
-                <input type="checkbox" checked>
+                <input type="checkbox" id="checkboxChatGPT" checked>
                 <span class="slider round"></span>
             </label>
             <label class="checkbox-item">
                 Gemini
-                <input type="checkbox">
+                <input type="checkbox" id="checkboxGemini">
                 <span class="slider round"></span>
             </label>
             <label class="checkbox-item">
                 Perplexity
-                <input type="checkbox">
+                <input type="checkbox" id="checkboxPerplexity">
                 <span class="slider round"></span>
             </label>
             <label class="checkbox-item">
                 Claude
-                <input type="checkbox">
+                <input type="checkbox" id="checkboxClaude">
                 <span class="slider round"></span>
             </label>
         </div>
-        <div id="responseSection" class="hidden"> <h2>Review & Edit Prompt</h2>
+
+        <div id="loadingIndicator" class="hidden">Loading...</div>
+        <div id="errorMessage" class="hidden"></div>
+
+        <div id="responseSection" class="hidden">
+            <h2>Review & Edit Prompt</h2>
             <textarea id="proposalText" rows="10" placeholder="Your prompt will appear here..."></textarea>
             <div class="response-buttons">
                 <button type="button" id="submitPromptButton" class="action-button">Submit</button>
             </div>
         </div>
     </div>
+
+    <script>
+        // --- Backend API Endpoints ---
+        // For local development, use your localhost address
+        const LOCAL_BACKEND_BASE_URL = "http://localhost:3000";
+        // For production, use your Lambda Function URL
+        const DEPLOYED_BACKEND_BASE_URL = "https://73poxcmbmm4uvea5isqcrfgjc40ltlnw.lambda-url.ap-south-1.on.aws";
+
+        // Determine which base URL to use. For simplicity, we'll use local for GET and deployed for POST as per your curl examples.
+        // In a real app, you'd likely toggle this based on environment (e.g., if(window.location.hostname === "localhost")).
+        const GET_API_BASE = LOCAL_BACKEND_BASE_URL;
+        const POST_API_BASE = DEPLOYED_BACKEND_BASE_URL;
+
+        // --- DOM Elements ---
+        const companyNameInput = document.getElementById('companyName');
+        const searchButton = document.getElementById('searchButton');
+        const responseSection = document.getElementById('responseSection');
+        const proposalTextarea = document.getElementById('proposalText');
+        const submitPromptButton = document.getElementById('submitPromptButton');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const errorMessageDiv = document.getElementById('errorMessage');
+
+        const checkboxChatGPT = document.getElementById('checkboxChatGPT');
+        const checkboxGemini = document.getElementById('checkboxGemini');
+        const checkboxPerplexity = document.getElementById('checkboxPerplexity');
+        const checkboxClaude = document.getElementById('checkboxClaude');
+
+        // --- Helper Functions ---
+        function showLoading() {
+            loadingIndicator.classList.remove('hidden');
+            errorMessageDiv.classList.add('hidden');
+            responseSection.classList.add('hidden');
+        }
+
+        function hideLoading() {
+            loadingIndicator.classList.add('hidden');
+        }
+
+        function showResponseSection() {
+            responseSection.classList.remove('hidden');
+        }
+
+        function showErrorMessage(message) {
+            errorMessageDiv.innerText = `Error: ${message}`;
+            errorMessageDiv.classList.remove('hidden');
+            responseSection.classList.add('hidden');
+        }
+
+        async function fetchData(url) {
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'accept': 'application/json'
+                    }
+                });
+                if (!response.ok) {
+                    const errorBody = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status} - ${errorBody}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Fetch error:', error);
+                throw error; // Re-throw to be caught by caller
+            }
+        }
+
+        async function postData(url, payload) {
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    const errorBody = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status} - ${errorBody}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Post error:', error);
+                throw error; // Re-throw to be caught by caller
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // Search Button Click Handler (GET request)
+        searchButton.addEventListener('click', async () => {
+            const companyName = companyNameInput.value.trim();
+            if (!companyName) {
+                showErrorMessage('Please enter a company name.');
+                return;
+            }
+
+            showLoading();
+
+            const url = `${GET_API_BASE}/base/v1/get-prompt-for-company/${encodeURIComponent(companyName)}`;
+
+            try {
+                const data = await fetchData(url);
+                if (data && data.company_research) {
+                    proposalTextarea.value = data.company_research;
+                    showResponseSection();
+                } else {
+                    showErrorMessage('No company research found in response.');
+                }
+                hideLoading();
+            } catch (error) {
+                showErrorMessage(`Failed to fetch prompt: ${error.message}`);
+                hideLoading();
+            }
+        });
+
+        // Submit Prompt Button Click Handler (POST request)
+        submitPromptButton.addEventListener('click', async () => {
+            const companyName = companyNameInput.value.trim();
+            const promptText = proposalTextarea.value.trim();
+
+            if (!companyName || !promptText) {
+                showErrorMessage('Company name and prompt text are required.');
+                return;
+            }
+
+            const payload = {
+                company_name: companyName,
+                prompt: promptText,
+                use_chatgpt: checkboxChatGPT.checked,
+                use_gemini: checkboxGemini.checked,
+                use_perplexity: checkboxPerplexity.checked,
+                use_claude: checkboxClaude.checked
+            };
+
+            showLoading();
+            // Using the provided deployed URL for the POST request
+            const url = `${POST_API_BASE}/base/v1/generate-company-insight`;
+
+            try {
+                const responseData = await postData(url, payload);
+                // Assuming the POST response is just a confirmation or processed data
+                proposalTextarea.value = `Insight generated successfully!\n\n${JSON.stringify(responseData, null, 2)}`;
+                showResponseSection(); // Keep the section visible
+                hideLoading();
+            } catch (error) {
+                showErrorMessage(`Failed to generate insight: ${error.message}`);
+                hideLoading();
+            }
+        });
+    </script>
 </body>
 </html>
