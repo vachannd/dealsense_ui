@@ -190,6 +190,28 @@
             color: #d9534f;
             margin-top: 15px;
         }
+
+        /* Styling for the new output area */
+        #finalOutputSection {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px; /* Space from the textarea */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            white-space: pre-wrap; /* Preserve whitespace and line breaks */
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            color: #333;
+            max-height: 500px; /* Optional: limit height and add scroll */
+            overflow-y: auto; /* Optional: add scrollbar if content exceeds max-height */
+        }
+
+        #finalOutputSection h3 {
+            color: #4CAF50;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -231,13 +253,18 @@
         <div id="errorMessage" class="hidden"></div>
 
         <div id="responseSection" class="hidden">
-            <h2>Review & Edit Prompt</h2>
-            <textarea id="proposalText" rows="10" placeholder="Your prompt will appear here..."></textarea>
+            <h2>Review & Edit Initial Prompt</h2>
+            <textarea id="proposalText" rows="10" placeholder="Your initial prompt will appear here..."></textarea>
             <div class="response-buttons">
-                <button type="button" id="submitPromptButton" class="action-button">Submit</button>
+                <button type="button" id="submitPromptButton" class="action-button">Generate Insight</button>
             </div>
         </div>
-    </div>
+
+        <div id="finalOutputSection" class="hidden">
+            <h3>Generated Company Insight</h3>
+            <pre id="insightContent"></pre>
+        </div>
+        </div>
 
     <script>
         // --- Backend API Endpoints ---
@@ -245,11 +272,6 @@
         const LOCAL_BACKEND_BASE_URL = "http://localhost:3000";
         // For production, use your Lambda Function URL
         const DEPLOYED_BACKEND_BASE_URL = "https://73poxcmbmm4uvea5isqcrfgjc40ltlnw.lambda-url.ap-south-1.on.aws";
-
-        // Determine which base URL to use. For simplicity, we'll use local for GET and deployed for POST as per your curl examples.
-        // In a real app, you'd likely toggle this based on environment (e.g., if(window.location.hostname === "localhost")).
-        const GET_API_BASE = LOCAL_BACKEND_BASE_URL;
-        const POST_API_BASE = DEPLOYED_BACKEND_BASE_URL;
 
         // --- DOM Elements ---
         const companyNameInput = document.getElementById('companyName');
@@ -265,11 +287,16 @@
         const checkboxPerplexity = document.getElementById('checkboxPerplexity');
         const checkboxClaude = document.getElementById('checkboxClaude');
 
+        // NEW: Get reference to the final output elements
+        const finalOutputSection = document.getElementById('finalOutputSection');
+        const insightContentDiv = document.getElementById('insightContent');
+
         // --- Helper Functions ---
         function showLoading() {
             loadingIndicator.classList.remove('hidden');
             errorMessageDiv.classList.add('hidden');
-            responseSection.classList.add('hidden');
+            responseSection.classList.add('hidden'); // Hide prompt section during initial load
+            finalOutputSection.classList.add('hidden'); // Hide final output section during any load
         }
 
         function hideLoading() {
@@ -278,12 +305,20 @@
 
         function showResponseSection() {
             responseSection.classList.remove('hidden');
+            finalOutputSection.classList.add('hidden'); // Ensure final output is hidden when showing prompt
+        }
+
+        function showFinalOutput(content) {
+            insightContentDiv.innerText = content; // Set text content
+            finalOutputSection.classList.remove('hidden'); // Show the final output section
+            responseSection.classList.add('hidden'); // Optionally hide the prompt section once insight is generated
         }
 
         function showErrorMessage(message) {
             errorMessageDiv.innerText = `Error: ${message}`;
             errorMessageDiv.classList.remove('hidden');
-            responseSection.classList.add('hidden');
+            responseSection.classList.add('hidden'); // Hide prompt section on error
+            finalOutputSection.classList.add('hidden'); // Hide final output section on error
         }
 
         async function fetchData(url) {
@@ -341,15 +376,15 @@
 
             try {
                 const data = await fetchData(url);
-                if (data && data.company_research) {
-                    proposalTextarea.value = data.company_research;
-                    showResponseSection();
+                if (data && data.potential_prompt) {
+                    proposalTextarea.value = data.potential_prompt;
+                    showResponseSection(); // Show the section with the prompt
                 } else {
-                    showErrorMessage('No company research found in response.');
+                    showErrorMessage('No initial prompt found for this company.');
                 }
                 hideLoading();
             } catch (error) {
-                showErrorMessage(`Failed to fetch prompt: ${error.message}`);
+                showErrorMessage(`Failed to fetch initial prompt: ${error.message}`);
                 hideLoading();
             }
         });
@@ -374,14 +409,16 @@
             };
 
             showLoading();
-            // Using the provided deployed URL for the POST request
             const url = `${DEPLOYED_BACKEND_BASE_URL}/base/v1/generate-company-insight`;
 
             try {
                 const responseData = await postData(url, payload);
-                // Assuming the POST response is just a confirmation or processed data
-                proposalTextarea.value = `Insight generated successfully!\n\n${JSON.stringify(responseData, null, 2)}`;
-                showResponseSection(); // Keep the section visible
+
+                if (responseData && responseData.company_research) {
+                    showFinalOutput(responseData.company_research); // Display the research
+                } else {
+                    showErrorMessage('Failed to get company insight from the response.');
+                }
                 hideLoading();
             } catch (error) {
                 showErrorMessage(`Failed to generate insight: ${error.message}`);
