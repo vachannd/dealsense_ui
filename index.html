@@ -337,7 +337,7 @@
 
             showLoading();
 
-            const url = `${GET_API_BASE}/base/v1/get-prompt-for-company/${encodeURIComponent(companyName)}`;
+            const url = `${DEPLOYED_BACKEND_BASE_URL}/base/v1/get-prompt-for-company/${encodeURIComponent(companyName)}`;
 
             try {
                 const data = await fetchData(url);
@@ -375,7 +375,7 @@
 
             showLoading();
             // Using the provided deployed URL for the POST request
-            const url = `${POST_API_BASE}/base/v1/generate-company-insight`;
+            const url = `${DEPLOYED_BACKEND_BASE_URL}/base/v1/generate-company-insight`;
 
             try {
                 const responseData = await postData(url, payload);
